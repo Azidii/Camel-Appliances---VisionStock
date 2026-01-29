@@ -1,5 +1,6 @@
 package com.example.visionstock.login
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -8,8 +9,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.visionstock.mainpage.MainActivity
 import com.example.visionstock.R
+import com.example.visionstock.register.RegisterActivity
 import com.google.android.material.textfield.TextInputEditText
-
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,36 +28,52 @@ class LoginActivity : AppCompatActivity() {
             val username = etUsername.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
+            // VALIDATION 1: Check for Empty Fields
             if (username.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please enter both Username and Password", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+
+            // CHECK 1: ADMIN ACCOUNT
+            if (username == "admin" && password == "alain121004") {
+                Toast.makeText(this, "Welcome, Admin!", Toast.LENGTH_SHORT).show()
+                saveUserSession("admin") // Save role as Admin
+                goToMainPage()
+            }
+            // CHECK 2: USER ACCOUNT (Hardcoded for now)
             else if (username == "alvin" && password == "12345") {
-                // Credentials match.
                 Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-
-                // Go to Main Activity
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish() // Close login page
-
-                overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit)
+                saveUserSession("user") // Save role as User
+                goToMainPage()
             }
+            // VALIDATION 2: ACCOUNT DOES NOT EXIST
             else {
-                // Navigate to Main App
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish() // Closes Login page so user can't go back
+                // This stops the user from entering if credentials are wrong
+                Toast.makeText(this, "Account does not exist or invalid credentials", Toast.LENGTH_SHORT).show()
             }
         }
 
         // 3. Handle "Create Account" Link Click
         tvCreateAccount.setOnClickListener {
-            tvCreateAccount.setOnClickListener {
-                val intent =
-                    Intent(this, com.example.visionstock.register.RegisterActivity::class.java)
-                startActivity(intent)
-                overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit)
-            }
+            val intent = Intent(this, RegisterActivity::class.java)
+            startActivity(intent)
+            overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit)
         }
+    }
+
+    // --- HELPER: Save User Role ---
+    private fun saveUserSession(role: String) {
+        val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+        val editor = sharedPref.edit()
+        editor.putString("role", role)
+        editor.apply()
+    }
+
+    // --- HELPER: Go to Main Page ---
+    private fun goToMainPage() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
+        overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit)
     }
 }

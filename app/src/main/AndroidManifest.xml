@@ -17,14 +17,20 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".login.LoginActivity"
+            android:name=".LoadingActivity"
             android:exported="true"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.App.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".login.LoginActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".register.RegisterActivity"
             android:screenOrientation="portrait"/>
@@ -34,6 +40,7 @@
 
         <activity android:name=".result.ResultActivity"
             android:screenOrientation="portrait"/>
+
     </application>
 
 </manifest>
