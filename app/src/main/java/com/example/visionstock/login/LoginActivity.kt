@@ -6,7 +6,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.visionstock.MainActivity
+import com.example.visionstock.mainpage.MainActivity
 import com.example.visionstock.R
 import com.google.android.material.textfield.TextInputEditText
 

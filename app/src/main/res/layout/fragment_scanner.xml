@@ -3,12 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical">
+    android:background="#000000">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Scanner Page"
-        android:textSize="24sp" />
-
+        android:text="Camera View Will Go Here"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
 </LinearLayout>
