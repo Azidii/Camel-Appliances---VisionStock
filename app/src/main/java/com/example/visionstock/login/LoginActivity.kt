@@ -1,4 +1,4 @@
-package com.example.visionstock.login // Keep your package name
+package com.example.visionstock.login
 
 import android.content.Intent
 import android.os.Bundle
@@ -31,7 +31,7 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please enter both Username and Password", Toast.LENGTH_SHORT).show()
             }
             else if (username == "alvin" && password == "12345") {
-                // Success! Credentials match.
+                // Credentials match.
                 Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
 
                 // Go to Main Activity
@@ -42,7 +42,7 @@ class LoginActivity : AppCompatActivity() {
                 overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit)
             }
             else {
-                // Success! Navigate to Main App
+                // Navigate to Main App
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
                 finish() // Closes Login page so user can't go back
