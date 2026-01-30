@@ -33,9 +33,16 @@ class AdminInventoryFragment : Fragment(R.layout.fragment_admin_inventory) {
         recyclerView.adapter = InventoryAdapter(dummyList)
 
         // 3. ADD BUTTON LOGIC
+        // 3. ADD BUTTON LOGIC
         view.findViewById<FloatingActionButton>(R.id.btnAddItem).setOnClickListener {
-            Toast.makeText(context, "Add Item Feature Coming Soon!", Toast.LENGTH_SHORT).show()
-            // Future: Open AddItemFragment() here
+            parentFragmentManager.beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_up, R.anim.fade_out,
+                    R.anim.fade_in, R.anim.slide_out_down
+                )
+                .replace(R.id.content_frame, AddItemFragment()) // Opens the new UI
+                .addToBackStack(null)
+                .commit()
         }
     }
 }
