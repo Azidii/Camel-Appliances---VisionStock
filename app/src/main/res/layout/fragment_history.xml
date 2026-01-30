@@ -19,13 +19,12 @@
             android:src="@drawable/ic_chevron_right"
             android:rotation="180"
             android:layout_centerVertical="true"
-            android:clickable="true"
-            android:focusable="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:padding="4dp"
             app:tint="#FFFFFF" />
 
         <TextView
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="History"
@@ -45,27 +44,46 @@
             android:src="@drawable/ic_magnifyingsearch"
             app:tint="#FFFFFF" />
 
+        <LinearLayout
+            android:id="@+id/searchContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@id/btnBack"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:background="#C8102E">
+
+            <EditText
+                android:id="@+id/etSearchBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Search history..."
+                android:textColor="#FFFFFF"
+                android:textColorHint="#E0E0E0"
+                android:background="@null"
+                android:maxLines="1"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:paddingHorizontal="8dp"/>
+
+            <ImageView
+                android:id="@+id/btnCloseSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
     </RelativeLayout>
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvHistory"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:alpha="0.5">
-
-        <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:src="@drawable/ic_history"
-            app:tint="#000000" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No history yet"
-            android:textSize="18sp"
-            android:layout_marginTop="16dp"/>
-    </LinearLayout>
+        android:padding="8dp"
+        android:clipToPadding="false"/>
 
 </LinearLayout>

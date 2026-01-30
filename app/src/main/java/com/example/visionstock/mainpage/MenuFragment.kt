@@ -5,9 +5,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.example.visionstock.R
-import com.example.visionstock.inventory.AdminInventoryFragment // Import Admin Fragment
+import com.example.visionstock.inventory.AdminInventoryFragment
 import com.example.visionstock.inventory.InventoryFragment
-import com.example.visionstock.result.HistoryFragment
+import com.example.visionstock.history.HistoryFragment
 
 class MenuFragment : Fragment(R.layout.fragment_menu) {
 

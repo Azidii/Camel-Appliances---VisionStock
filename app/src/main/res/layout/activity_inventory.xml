@@ -25,6 +25,7 @@
             app:tint="#FFFFFF" />
 
         <TextView
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -43,6 +44,40 @@
             android:padding="8dp"
             android:src="@drawable/ic_magnifyingsearch"
             app:tint="#FFFFFF" />
+
+        <LinearLayout
+            android:id="@+id/searchContainer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@id/btnBack"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:background="#C8102E">
+
+            <EditText
+                android:id="@+id/etSearchBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Search item..."
+                android:textColor="#FFFFFF"
+                android:textColorHint="#E0E0E0"
+                android:background="@null"
+                android:maxLines="1"
+                android:inputType="text"
+                android:imeOptions="actionSearch"
+                android:paddingHorizontal="8dp"/>
+
+            <ImageView
+                android:id="@+id/btnCloseSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="#FFFFFF" />
+        </LinearLayout>
 
     </RelativeLayout>
 

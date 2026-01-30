@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.visionstock.HomeFragment
 import com.example.visionstock.R
 import com.example.visionstock.login.LoginActivity
 import com.example.visionstock.scanner.ScannerFragment
@@ -79,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                 transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right)
             }
             "NONE" -> {
-                
+                // No animation
             }
         }
 
