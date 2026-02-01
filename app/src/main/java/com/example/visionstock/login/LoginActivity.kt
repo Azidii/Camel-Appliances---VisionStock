@@ -5,75 +5,95 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.visionstock.mainpage.MainActivity
+import com.example.visionstock.DialogHelper
 import com.example.visionstock.R
+import com.example.visionstock.mainpage.MainActivity
 import com.example.visionstock.register.RegisterActivity
 import com.google.android.material.textfield.TextInputEditText
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth
+    private val db = FirebaseFirestore.getInstance()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // 1. Initialize Views
+        auth = FirebaseAuth.getInstance()
+
         val etUsername = findViewById<TextInputEditText>(R.id.etUsername)
         val etPassword = findViewById<TextInputEditText>(R.id.etPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
         val tvCreateAccount = findViewById<TextView>(R.id.tvCreateAccount)
 
-        // 2. Handle Login Button Click
         btnLogin.setOnClickListener {
-            val username = etUsername.text.toString().trim()
+            val usernameInput = etUsername.text.toString().trim()
             val password = etPassword.text.toString().trim()
 
-            // VALIDATION 1: Check for Empty Fields
-            if (username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please enter both Username and Password", Toast.LENGTH_SHORT).show()
+            // 1. INPUT VALIDATION (With Popup)
+            if (usernameInput.isEmpty() || password.isEmpty()) {
+                DialogHelper.showError(this, "Missing Info", "Please enter both username and password.")
                 return@setOnClickListener
             }
 
-            // CHECK 1: ADMIN ACCOUNT
-            if (username == "admin" && password == "alain121004") {
-                Toast.makeText(this, "Welcome, Admin!", Toast.LENGTH_SHORT).show()
-                saveUserSession("admin") // Save role as Admin
-                goToMainPage()
-            }
-            // CHECK 2: USER ACCOUNT (Hardcoded for now)
-            else if (username == "alvin" && password == "12345") {
-                Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-                saveUserSession("user") // Save role as User
-                goToMainPage()
-            }
-            // VALIDATION 2: ACCOUNT DOES NOT EXIST
-            else {
-                // This stops the user from entering if credentials are wrong
-                Toast.makeText(this, "Account does not exist or invalid credentials", Toast.LENGTH_SHORT).show()
-            }
+            db.collection("users")
+                .whereEqualTo("username", usernameInput)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty) {
+                        DialogHelper.showError(this, "Login Failed", "Username not found.")
+                    } else {
+                        val document = documents.documents[0]
+                        val email = document.getString("email") ?: ""
+                        val role = document.getString("role") ?: "user"
+                        val username = document.getString("username") ?: "User Name"
+
+                        // 2. CHECK IF BANNED
+                        val status = document.getString("status")
+                        if (status == "banned") {
+                            DialogHelper.showError(this, "Access Denied", "Your account has been suspended by the admin.")
+                            return@addOnSuccessListener // Stop here
+                        }
+
+                        // 3. ATTEMPT LOGIN
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    // 4. SUCCESS POPUP
+                                    DialogHelper.showSuccess(this, "Welcome Back!", "Login Successful.") {
+                                        // Run this ONLY after user clicks "Okay"
+                                        saveUserSession(role, username, email)
+                                        startActivity(Intent(this, MainActivity::class.java))
+                                        finish()
+                                    }
+                                } else {
+                                    DialogHelper.showError(this, "Login Failed", "Invalid Password.")
+                                }
+                            }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    DialogHelper.showError(this, "Connection Error", e.message ?: "Unknown error")
+                }
         }
 
-        // 3. Handle "Create Account" Link Click
         tvCreateAccount.setOnClickListener {
-            val intent = Intent(this, RegisterActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit)
+            startActivity(Intent(this, RegisterActivity::class.java))
+            // --- ADDED ANIMATION HERE ---
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
     }
 
-    // --- HELPER: Save User Role ---
-    private fun saveUserSession(role: String) {
+    private fun saveUserSession(role: String, username: String, email: String) {
         val sharedPref = getSharedPreferences("UserSession", Context.MODE_PRIVATE)
         val editor = sharedPref.edit()
         editor.putString("role", role)
+        editor.putString("username", username)
+        editor.putString("email", email)
         editor.apply()
-    }
-
-    // --- HELPER: Go to Main Page ---
-    private fun goToMainPage() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
-        overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit)
     }
 }

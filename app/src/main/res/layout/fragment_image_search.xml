@@ -1,21 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clickable="true"
-    android:focusable="true"
-    android:focusableInTouchMode="true"
+    android:orientation="vertical"
     android:background="#F5F5F5">
 
     <RelativeLayout
-        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="#C8102E"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toTopOf="parent">
+        android:paddingHorizontal="16dp">
 
         <ImageView
             android:id="@+id/btnBack"
@@ -39,9 +34,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/header"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -50,84 +43,89 @@
             android:padding="24dp">
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Enter Search Criteria"
-                android:textSize="18sp"
-                android:textStyle="bold"
+                android:text="Enter Details"
                 android:textColor="#424242"
+                android:textSize="16sp"
+                android:textStyle="bold"
                 android:layout_marginBottom="16dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search by Item ID"
+                android:layout_marginBottom="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxStrokeColor="#E0E0E0"
                 app:startIconDrawable="@drawable/ic_tag"
-                app:startIconTint="#1565C0"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp">
+                app:startIconTint="#1976D2">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSearchId"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapCharacters"/>
+                    android:hint="Search by Item ID"
+                    android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search by Name"
-                app:startIconDrawable="@drawable/ic_description"
-                app:startIconTint="#7B1FA2"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxStrokeColor="#E0E0E0"
+                app:startIconDrawable="@drawable/ic_inventory"
+                app:startIconTint="#7B1FA2">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSearchName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords"/>
+                    android:hint="Search by Name"
+                    android:inputType="textCapWords" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Search by Description keyword"
-                app:startIconDrawable="@drawable/ic_description"
-                app:startIconTint="#7B1FA2"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etSearchDesc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Search by Location (Aisle)"
+                android:layout_marginBottom="32dp"
+                app:boxBackgroundColor="#FFFFFF"
+                app:boxCornerRadiusTopStart="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                app:boxStrokeColor="#E0E0E0"
                 app:startIconDrawable="@drawable/ic_location_on"
-                app:startIconTint="#EF6C00"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="32dp">
+                app:startIconTint="#F57C00">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etSearchLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords"/>
+                    android:hint="Search by Location (Aisle)"
+                    android:inputType="textCapCharacters" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/btnDoSearch"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPerformSearch"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="56dp"
                 android:text="Search"
-                android:textAllCaps="false"
-                android:backgroundTint="#C8102E"
-                android:textSize="18sp"
-                app:cornerRadius="12dp"/>
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="#C8102E"
+                app:cornerRadius="8dp"
+                android:elevation="4dp"/>
 
         </LinearLayout>
     </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

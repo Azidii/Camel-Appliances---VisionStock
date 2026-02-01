@@ -1,3 +1,5 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+app/google-services.json
+google-services.json

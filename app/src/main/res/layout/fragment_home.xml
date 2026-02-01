@@ -36,55 +36,54 @@
         app:layout_constraintStart_toStartOf="@id/tvDate"
         app:layout_constraintTop_toBottomOf="@id/tvDate" />
 
-    <LinearLayout
+    <GridLayout
         android:id="@+id/statsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="20dp"
-        android:clipToPadding="false"
         android:layout_marginTop="24dp"
+        android:paddingHorizontal="12dp"
+        android:columnCount="3"
+        android:rowCount="1"
         app:layout_constraintTop_toBottomOf="@id/tvWelcome">
 
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="6dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardElevation="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp"
+                android:padding="16dp"
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:src="@android:drawable/ic_menu_sort_by_size"
                     android:background="@drawable/bg_circle_soft"
                     android:backgroundTint="#FFEBEE"
-                    android:padding="10dp"
+                    android:padding="8dp"
                     app:tint="#C8102E"/>
 
                 <TextView
+                    android:id="@+id/tvTotalStock"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textSize="28sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="#212121"
-                    android:layout_marginTop="12dp"/>
+                    android:layout_marginTop="8dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Stock"
-                    android:textSize="14sp"
+                    android:text="Stock"
+                    android:textSize="12sp"
                     android:textColor="#757575"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -92,45 +91,89 @@
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="8dp"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="6dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardElevation="6dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="20dp"
+                android:padding="16dp"
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:src="@android:drawable/ic_menu_recent_history"
                     android:background="@drawable/bg_circle_soft"
                     android:backgroundTint="#E3F2FD"
-                    android:padding="10dp"
+                    android:padding="8dp"
                     app:tint="#1976D2"/>
 
                 <TextView
+                    android:id="@+id/tvTotalScans"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
-                    android:textSize="28sp"
+                    android:textSize="22sp"
                     android:textStyle="bold"
                     android:textColor="#1976D2"
-                    android:layout_marginTop="12dp"/>
+                    android:layout_marginTop="8dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Recent Scans"
-                    android:textSize="14sp"
+                    android:text="Scans"
+                    android:textSize="12sp"
                     android:textColor="#757575"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-    </LinearLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardUserCount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp"
+            android:visibility="gone"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_users"
+                    android:background="@drawable/bg_circle_soft"
+                    android:backgroundTint="#E8F5E9"
+                    android:padding="8dp"
+                    app:tint="#4CAF50"/>
+
+                <TextView
+                    android:id="@+id/tvTotalUsers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="#4CAF50"
+                    android:layout_marginTop="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Users"
+                    android:textSize="12sp"
+                    android:textColor="#757575"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </GridLayout>
 
     <TextView
         android:id="@+id/tvRecentLabel"

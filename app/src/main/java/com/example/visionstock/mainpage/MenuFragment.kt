@@ -3,48 +3,69 @@ package com.example.visionstock.mainpage
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.visionstock.R
 import com.example.visionstock.inventory.AdminInventoryFragment
 import com.example.visionstock.inventory.InventoryFragment
 import com.example.visionstock.history.HistoryFragment
+import com.example.visionstock.mainpage.UsersFragment
 
 class MenuFragment : Fragment(R.layout.fragment_menu) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Logout
-        view.findViewById<View>(R.id.menuLogout).setOnClickListener {
-            (activity as? MainActivity)?.showLogoutDialog()
+        // --- 1. DISPLAY LOGGED-IN USERNAME & EMAIL ---
+        val tvUserName = view.findViewById<TextView>(R.id.tvUserName)
+        val tvEmail = view.findViewById<TextView>(R.id.tvUserEmail) // <--- NEW: Find Email View
+
+        val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+
+        // Retrieve data saved during LoginActivity
+        val username = sharedPref.getString("username", "User Name")
+        val email = sharedPref.getString("email", "user@email.com") // <--- NEW: Get Email
+
+        tvUserName.text = username
+        tvEmail.text = email // <--- NEW: Set Email Text
+
+        // 2. INVENTORY (Admin vs User logic)
+        view.findViewById<View>(R.id.menuInventory).setOnClickListener {
+            if (isAdmin()) {
+                openFragment(AdminInventoryFragment())
+            } else {
+                openFragment(InventoryFragment())
+            }
         }
 
-        // 2. History
+        // 3. HISTORY
         view.findViewById<View>(R.id.menuHistory).setOnClickListener {
             openFragment(HistoryFragment())
         }
 
-        // 3. INVENTORY (The Logic Switch)
-        view.findViewById<View>(R.id.menuInventory).setOnClickListener {
-
-            if (isAdmin()) {
-                // GO TO ADMIN INVENTORY (Has '+' Button)
-                openFragment(AdminInventoryFragment())
-            } else {
-                // GO TO REGULAR INVENTORY (View Only)
-                openFragment(InventoryFragment())
+        // 4. MANAGE USERS (Only visible if role is "admin")
+        val btnUsers = view.findViewById<View>(R.id.menuUsers)
+        if (isAdmin()) {
+            btnUsers.visibility = View.VISIBLE
+            btnUsers.setOnClickListener {
+                openFragment(UsersFragment())
             }
+        } else {
+            btnUsers.visibility = View.GONE
+        }
+
+        // 5. LOGOUT
+        view.findViewById<View>(R.id.menuLogout).setOnClickListener {
+            (activity as? MainActivity)?.showLogoutDialog()
         }
     }
 
-    // HELPER: Checks SharedPreferences for user type
     private fun isAdmin(): Boolean {
         val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
-        val role = sharedPref.getString("role", "user") // Default to "user"
+        val role = sharedPref.getString("role", "user")
         return role == "admin"
     }
 
-    // HELPER: To make the code cleaner
     private fun openFragment(fragment: Fragment) {
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(

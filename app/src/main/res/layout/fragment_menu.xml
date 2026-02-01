@@ -41,7 +41,7 @@
 
             <TextView
                 android:id="@+id/tvUserName"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="User Name"
                 android:textColor="#FFFFFF"
@@ -49,7 +49,22 @@
                 android:textStyle="bold"
                 android:layout_marginStart="20dp"
                 app:layout_constraintStart_toEndOf="@id/cardAvatar"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/cardAvatar"
+                app:layout_constraintBottom_toTopOf="@id/tvUserEmail"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <TextView
+                android:id="@+id/tvUserEmail"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="user@email.com"
+                android:textColor="#E0E0E0"
+                android:textSize="14sp"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toEndOf="@id/cardAvatar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvUserName"
                 app:layout_constraintBottom_toBottomOf="@id/cardAvatar" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -87,7 +102,6 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_inventory"
             app:tint="#212121"/>
-
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -138,6 +152,39 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/menuUsers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="20dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_users"
+            app:tint="#212121"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Manage Users"
+            android:textColor="#212121"
+            android:textSize="16sp"
+            android:layout_marginStart="16dp"/>
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_chevron_right"
+            app:tint="#757575"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/menuLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -153,7 +200,6 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_logout"
             app:tint="#212121"/>
-
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
