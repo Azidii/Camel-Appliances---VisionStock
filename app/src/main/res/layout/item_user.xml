@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardUser"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
     app:cardCornerRadius="16dp"
-    app:cardElevation="4dp">
+    app:cardElevation="4dp"
+    app:strokeColor="#4CAF50"
+    app:strokeWidth="0dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,13 +24,15 @@
         <FrameLayout
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/bg_circle_soft"> <ImageView
-            android:id="@+id/ivUserIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_users"
-            app:tint="#1976D2" />
+            android:background="@drawable/bg_circle_soft">
+
+            <ImageView
+                android:id="@+id/ivUserIcon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_users"
+                app:tint="#1976D2" />
         </FrameLayout>
 
         <LinearLayout
@@ -44,13 +49,15 @@
                 tools:text="Username"
                 android:textStyle="bold"
                 android:textColor="#212121"
-                android:textSize="18sp"/> <TextView
-            android:id="@+id/tvUserId"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:text="ID: 12345"
-            android:textColor="#757575"
-            android:textSize="12sp"/>
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/tvUserId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="ID: 12345"
+                android:textColor="#757575"
+                android:textSize="12sp"/>
 
             <TextView
                 android:id="@+id/tvPassword"
@@ -61,6 +68,19 @@
                 android:textSize="12sp"/>
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tvStatusPill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ACTIVE"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/bg_status_pill"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:layout_marginEnd="8dp"/>
+
         <CheckBox
             android:id="@+id/cbSelectUser"
             android:layout_width="wrap_content"
@@ -68,4 +88,5 @@
             android:visibility="gone"/>
 
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+
+</com.google.android.material.card.MaterialCardView>

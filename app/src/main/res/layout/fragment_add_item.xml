@@ -19,11 +19,11 @@
 
         <ImageView
             android:id="@+id/btnBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_centerVertical="true"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="8dp"
+            android:padding="4dp"
             android:src="@drawable/ic_arrow_back"
             app:tint="#FFFFFF" />
 
@@ -57,7 +57,7 @@
                 app:cardCornerRadius="24dp"
                 app:cardElevation="8dp"
                 app:strokeColor="#C8102E"
-                app:strokeWidth="2dp"
+                app:strokeWidth="1dp"
                 android:clickable="true"
                 android:focusable="true"
                 android:foreground="?attr/selectableItemBackground"
@@ -72,8 +72,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerInside"
-                        android:padding="50dp"
-                        android:src="@drawable/ic_image_placeholder" />
+                        android:background="#E0E0E0" />
 
                     <LinearLayout
                         android:id="@+id/layoutAddPhotoOverlay"
@@ -84,17 +83,18 @@
                         android:gravity="center">
 
                         <ImageView
-                            android:layout_width="56dp"
-                            android:layout_height="56dp"
-                            android:src="@drawable/ic_add_a_photo" />
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@android:drawable/ic_menu_camera"
+                            app:tint="#757575"/>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Add Photo"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="#C8102E"
+                            android:textColor="#757575"
                             android:layout_marginTop="8dp"/>
                     </LinearLayout>
                 </FrameLayout>
@@ -112,7 +112,8 @@
                     android:id="@+id/etItemId"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapCharacters"/>
+                    android:inputType="textCapCharacters"
+                    android:imeOptions="actionNext"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -127,24 +128,41 @@
                     android:id="@+id/etItemName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords"/>
+                    android:inputType="textCapWords"
+                    android:imeOptions="actionNext"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Description (Details)"
-                app:startIconDrawable="@drawable/ic_description"
+                android:hint="Category"
+                app:startIconDrawable="@drawable/ic_view_list"
                 app:startIconTint="#7B1FA2"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/etItemCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:padding="16dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Quantity"
+                app:startIconDrawable="@drawable/ic_view_list"
+                app:startIconTint="#4CAF50"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_marginBottom="16dp">
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etItemDesc"
+                    android:id="@+id/etItemQuantity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapSentences|textMultiLine"
-                    android:minLines="2"
-                    android:maxLines="4"/>
+                    android:inputType="number"
+                    android:imeOptions="actionNext"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -159,7 +177,8 @@
                     android:id="@+id/etItemLocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapWords"/>
+                    android:inputType="textCapWords"
+                    android:imeOptions="actionDone"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
@@ -169,8 +188,10 @@
                 android:text="Save Item"
                 android:textAllCaps="false"
                 android:backgroundTint="#C8102E"
-                android:textSize="16sp"
-                app:cornerRadius="12dp"/>
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:cornerRadius="12dp"
+                android:elevation="4dp"/>
 
         </LinearLayout>
     </ScrollView>

@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.visionstock.DialogHelper
+import com.example.visionstock.helper.DialogHelper
 import com.example.visionstock.R
 import com.example.visionstock.mainpage.MainActivity
 import com.example.visionstock.register.RegisterActivity

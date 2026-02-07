@@ -1,8 +1,11 @@
-package com.example.visionstock.item // <--- THIS MUST MATCH THE FOLDER 'item'
+package com.example.visionstock.item
 
 data class UserItem(
-    val userId: String,
-    val username: String,
-    val password: String,
-    val status: String
+    // DEFAULT VALUES (= "") ARE REQUIRED FOR FIREBASE TO WORK
+    var userId: String = "",
+    var username: String = "",
+    var email: String = "",
+    var role: String = "",
+    var status: String = "",
+    var password: String = "" // Keep this if you use it locally, even if not in DB
 )

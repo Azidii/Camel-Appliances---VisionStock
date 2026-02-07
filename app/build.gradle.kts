@@ -45,6 +45,7 @@ android {
 }
 dependencies {
     // Firebase
+    implementation("com.google.firebase:firebase-storage")
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
@@ -59,6 +60,7 @@ dependencies {
 
     // UI Libraries
     implementation(libs.androidx.core.ktx)
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation(libs.androidx.lifecycle.runtime.ktx)

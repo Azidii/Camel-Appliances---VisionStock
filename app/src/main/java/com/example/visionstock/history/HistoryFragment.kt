@@ -25,7 +25,6 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
     private lateinit var adapter: InventoryAdapter
     private var historyList: MutableList<InventoryItem> = mutableListOf()
 
-    // Track selection mode state
     private var isSelectionMode = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,32 +35,29 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         val btnCancelDelete = view.findViewById<ImageView>(R.id.btnCancelDelete)
         val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
         val btnClearAll = view.findViewById<TextView>(R.id.btnClearAll)
-
         val normalActions = view.findViewById<LinearLayout>(R.id.normalActions)
         val btnSearch = view.findViewById<ImageView>(R.id.btnSearch)
-
-        // The Red Trash Button (FAB)
         val fabDeleteAll = view.findViewById<FloatingActionButton>(R.id.fabDeleteAll)
-
         val searchContainer = view.findViewById<LinearLayout>(R.id.searchContainer)
         val etSearchBar = view.findViewById<EditText>(R.id.etSearchBar)
         val btnCloseSearch = view.findViewById<ImageView>(R.id.btnCloseSearch)
-
         val rvHistory = view.findViewById<RecyclerView>(R.id.rvHistory)
 
-        // --- DUMMY DATA ---
+        // --- DUMMY DATA (Categorized) ---
         if (historyList.isEmpty()) {
             historyList = mutableListOf(
-                InventoryItem("Scanned Item 1", "SKU-001", 10),
-                InventoryItem("Scanned Item 2", "SKU-002", 5),
-                InventoryItem("Scanned Item 3", "SKU-003", 20)
+                InventoryItem(itemID = "SCAN-001", name = "Scanned Item 1", category = "Raw Materials", quantity = 10),
+                InventoryItem(itemID = "SCAN-002", name = "Scanned Item 2", category = "Electronic & Electrical Components", quantity = 5),
+                InventoryItem(itemID = "SCAN-003", name = "Scanned Item 3", category = "Fasteners & Hardware", quantity = 20)
             )
         }
 
+        // Initialize Adapter with the categorized logic implemented previously
         adapter = InventoryAdapter(historyList)
         rvHistory.layoutManager = LinearLayoutManager(requireContext())
         rvHistory.adapter = adapter
 
+        // Initial empty state check
         toggleEmptyState(historyList.size)
 
         // --- LISTENERS ---
@@ -76,7 +72,6 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
             }
 
             if (!isSelectionMode) {
-                // STATE A: ENTER SELECTION MODE
                 isSelectionMode = true
 
                 // Update UI: Show Header Options
@@ -86,66 +81,49 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
                 btnClearAll.visibility = View.VISIBLE
                 tvTitle.text = "Select Items"
 
-                // CRITICAL: Keep FAB Visible
-                fabDeleteAll.visibility = View.VISIBLE
-
-                // Show Checkboxes
                 adapter.toggleSelectionMode(true)
-
             } else {
-                // STATE B: DELETE SELECTED ITEMS (User clicked FAB again)
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Delete Selected")
-                    .setMessage("Are you sure you want to delete the selected items?")
-                    .setPositiveButton("Delete") { _, _ ->
-                        adapter.deleteSelectedItems()
+                // STATE B: DELETE SELECTED ITEMS
+                val selectedItems = adapter.getSelectedItems()
 
-                        // Exit selection mode after deleting
-                        btnCancelDelete.performClick()
+                if (selectedItems.isNotEmpty()) {
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Delete Selected")
+                        .setMessage("Are you sure you want to delete ${selectedItems.size} items?")
+                        .setPositiveButton("Delete") { _, _ ->
+                            // This now references the new method in InventoryAdapter
+                            adapter.deleteSelectedItems()
 
-                        toggleEmptyState(if(adapter.isEmpty()) 0 else 1)
-                        Toast.makeText(requireContext(), "Selected items deleted", Toast.LENGTH_SHORT).show()
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+                            exitSelectionMode()
+                            // Re-check empty state after deletion
+                            toggleEmptyState(if(adapter.isEmpty()) 0 else 1)
+                            Toast.makeText(requireContext(), "Selected items deleted", Toast.LENGTH_SHORT).show()
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                } else {
+                    Toast.makeText(requireContext(), "No items selected", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
-        // 2. CLEAR ALL CLICK (Wipes Everything)
+        // 2. CLEAR ALL CLICK (Full wipe)
         btnClearAll.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Clear All History")
                 .setMessage("This will permanently delete ALL items from history. Are you sure?")
                 .setPositiveButton("Delete All") { _, _ ->
-
-                    // CALL DELETE ALL (Wipe everything)
+                    // This now references the new method in InventoryAdapter
                     adapter.deleteAllItems()
-
-                    // Exit selection mode
-                    btnCancelDelete.performClick()
-
-                    toggleEmptyState(0)
+                    exitSelectionMode()
+                    toggleEmptyState(0) // Explicitly show empty state
                     Toast.makeText(requireContext(), "History cleared", Toast.LENGTH_SHORT).show()
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
         }
 
-        // 3. CANCEL / EXIT MODE (Click X)
-        btnCancelDelete.setOnClickListener {
-            isSelectionMode = false
-
-            // Revert UI
-            btnBack.visibility = View.VISIBLE
-            btnCancelDelete.visibility = View.GONE
-            normalActions.visibility = View.VISIBLE
-            btnClearAll.visibility = View.GONE
-
-            tvTitle.text = "History"
-
-            // Hide Checkboxes
-            adapter.toggleSelectionMode(false)
-        }
+        btnCancelDelete.setOnClickListener { exitSelectionMode() }
 
         // --- SEARCH LOGIC ---
         btnSearch.setOnClickListener {
@@ -160,11 +138,9 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         btnCloseSearch.setOnClickListener {
             etSearchBar.text.clear()
             adapter.filterList("")
-
             searchContainer.visibility = View.GONE
             tvTitle.visibility = View.VISIBLE
             normalActions.visibility = View.VISIBLE
-
             val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
@@ -178,6 +154,16 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         })
     }
 
+    private fun exitSelectionMode() {
+        isSelectionMode = false
+        view?.findViewById<ImageView>(R.id.btnBack)?.visibility = View.VISIBLE
+        view?.findViewById<ImageView>(R.id.btnCancelDelete)?.visibility = View.GONE
+        view?.findViewById<LinearLayout>(R.id.normalActions)?.visibility = View.VISIBLE
+        view?.findViewById<TextView>(R.id.btnClearAll)?.visibility = View.GONE
+        view?.findViewById<TextView>(R.id.tvTitle)?.text = "History"
+        adapter.toggleSelectionMode(false)
+    }
+
     private fun toggleEmptyState(itemCount: Int) {
         val rvHistory = view?.findViewById<RecyclerView>(R.id.rvHistory)
         val emptyState = view?.findViewById<LinearLayout>(R.id.emptyState)
@@ -185,7 +171,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
 
         if (itemCount == 0) {
             rvHistory?.visibility = View.GONE
-            emptyState?.visibility = View.VISIBLE
+            emptyState?.visibility = View.VISIBLE // Fixed unused reference
             fabDeleteAll?.visibility = View.GONE
         } else {
             rvHistory?.visibility = View.VISIBLE

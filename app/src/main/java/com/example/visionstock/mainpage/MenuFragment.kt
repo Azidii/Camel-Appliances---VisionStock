@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.visionstock.R
 import com.example.visionstock.inventory.AdminInventoryFragment
-import com.example.visionstock.inventory.InventoryFragment
+import com.example.visionstock.mainpage.InventoryFragment
 import com.example.visionstock.history.HistoryFragment
 import com.example.visionstock.mainpage.UsersFragment
 

@@ -1,117 +1,192 @@
 package com.example.visionstock.adapter
 
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.Typeface
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.visionstock.R
 import com.example.visionstock.item.InventoryItem
 import java.util.Locale
 
-class InventoryAdapter(private var items: MutableList<InventoryItem>) :
-    RecyclerView.Adapter<InventoryAdapter.ViewHolder>() {
+// 1. Define View Types for Headers and Items
+private const val TYPE_HEADER = 0
+private const val TYPE_ITEM = 1
 
-    // Keep a copy of the full list for filtering searches
-    private var fullList: MutableList<InventoryItem> = ArrayList(items)
+class InventoryAdapter(
+    private var allItems: MutableList<InventoryItem>
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    // SELECTION MODE VARIABLES
+    private var fullList: MutableList<InventoryItem> = ArrayList(allItems)
+    private var displayList: MutableList<Any> = mutableListOf()
     private var isSelectionMode = false
-    private val selectedItems = HashSet<Int>() // Stores positions of checked items
+    private val selectedItems = mutableSetOf<InventoryItem>()
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    init {
+        organizeData(allItems)
+    }
+
+    private fun organizeData(items: List<InventoryItem>) {
+        displayList.clear()
+
+        val rawMaterials = mutableListOf<InventoryItem>()
+        val electrical = mutableListOf<InventoryItem>()
+        val mechanical = mutableListOf<InventoryItem>()
+        val fasteners = mutableListOf<InventoryItem>()
+        val consumables = mutableListOf<InventoryItem>()
+        val others = mutableListOf<InventoryItem>()
+
+        for (item in items) {
+            when (item.category.trim()) { // Added trim to handle spacing issues
+                "Raw Materials" -> rawMaterials.add(item)
+                "Electronic & Electrical Components" -> electrical.add(item)
+                "Mechanical Components" -> mechanical.add(item)
+                "Fasteners & Hardware" -> fasteners.add(item)
+                "Production Consumables" -> consumables.add(item)
+                else -> others.add(item)
+            }
+        }
+
+        addSection("Raw Materials", rawMaterials)
+        addSection("Electronic & Electrical Components", electrical)
+        addSection("Mechanical Components", mechanical)
+        addSection("Fasteners & Hardware", fasteners)
+        addSection("Production Consumables", consumables)
+        addSection("Others", others)
+
+        notifyDataSetChanged()
+    }
+
+    private fun addSection(title: String, items: List<InventoryItem>) {
+        if (items.isNotEmpty()) {
+            displayList.add("$title (${items.size})")
+            displayList.addAll(items.sortedBy { it.name })
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (displayList[position] is String) TYPE_HEADER else TYPE_ITEM
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_HEADER) {
+            val view = LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false)
+            HeaderViewHolder(view)
+        } else {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_inventory, parent, false)
+            ItemViewHolder(view)
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is HeaderViewHolder) {
+            val title = displayList[position] as String
+            holder.tvHeader.text = title
+            holder.tvHeader.setTypeface(null, Typeface.BOLD)
+            holder.tvHeader.setTextColor(Color.parseColor("#C8102E"))
+            holder.tvHeader.setPadding(45, 50, 40, 20)
+            holder.tvHeader.setBackgroundColor(Color.parseColor("#F5F5F5"))
+
+        } else if (holder is ItemViewHolder) {
+            val item = displayList[position] as InventoryItem
+
+            holder.tvName.text = item.name
+            holder.tvSku.text = "ID: ${item.itemID}"
+            holder.tvQty.text = item.quantity.toString()
+
+            // --- FEATURE: LOAD PRODUCT IMAGE FROM DATABASE ---
+            if (item.imageUrl.isNotEmpty()) {
+                try {
+                    val decodedBytes = Base64.decode(item.imageUrl, Base64.DEFAULT)
+                    val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                    holder.ivItemImage.setImageBitmap(bitmap)
+                    holder.ivItemImage.imageTintList = null // Remove any icon tints
+                } catch (e: Exception) {
+                    holder.ivItemImage.setImageResource(R.drawable.ic_tag) // Fallback on error
+                }
+            } else {
+                holder.ivItemImage.setImageResource(R.drawable.ic_tag)
+            }
+
+            if (isSelectionMode) {
+                holder.cbSelect.visibility = View.VISIBLE
+                holder.cbSelect.isChecked = selectedItems.contains(item)
+
+                val toggleAction = {
+                    if (selectedItems.contains(item)) selectedItems.remove(item)
+                    else selectedItems.add(item)
+                    notifyItemChanged(position)
+                }
+
+                holder.cbSelect.setOnClickListener { toggleAction() }
+                holder.itemView.setOnClickListener { toggleAction() }
+            } else {
+                holder.cbSelect.visibility = View.GONE
+                holder.itemView.setOnClickListener(null)
+            }
+        }
+    }
+
+    override fun getItemCount(): Int = displayList.size
+
+    class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val tvHeader: TextView = view.findViewById(android.R.id.text1)
+    }
+
+    class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val ivItemImage: ImageView = view.findViewById(R.id.ivItemImage) // Bind new ImageView
         val tvName: TextView = view.findViewById(R.id.tvItemName)
         val tvSku: TextView = view.findViewById(R.id.tvItemSku)
         val tvQty: TextView = view.findViewById(R.id.tvQuantity)
-        val cbSelect: CheckBox = view.findViewById(R.id.cbSelect) // The checkbox for delete mode
+        val cbSelect: CheckBox = view.findViewById(R.id.cbSelect)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_inventory, parent, false)
-        return ViewHolder(view)
+    fun updateList(newList: List<InventoryItem>) {
+        allItems = newList.toMutableList()
+        fullList = ArrayList(newList)
+        organizeData(allItems)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = items[position]
-        holder.tvName.text = item.name
-        holder.tvSku.text = item.sku
-        holder.tvQty.text = item.quantity.toString()
-
-        // --- HANDLE SELECTION MODE ---
-        if (isSelectionMode) {
-            holder.cbSelect.visibility = View.VISIBLE // Show checkbox
-            holder.cbSelect.isChecked = selectedItems.contains(position)
-
-            // Handle Checkbox Click
-            holder.cbSelect.setOnClickListener {
-                toggleSelection(position)
-            }
-            // Handle Row Click (toggles checkbox too)
-            holder.itemView.setOnClickListener {
-                holder.cbSelect.isChecked = !holder.cbSelect.isChecked
-                toggleSelection(position)
-            }
-        } else {
-            holder.cbSelect.visibility = View.GONE // Hide checkbox
-            holder.itemView.setOnClickListener(null) // Disable click in normal mode
-        }
-    }
-
-    override fun getItemCount() = items.size
-
-    // --- NEW FUNCTIONS FOR DELETE MODE ---
-
-    fun toggleSelectionMode(enabled: Boolean) {
-        isSelectionMode = enabled
-        selectedItems.clear() // Reset selection
-        notifyDataSetChanged() // Refresh UI to show/hide checkboxes
-    }
-
-    private fun toggleSelection(position: Int) {
-        if (selectedItems.contains(position)) {
-            selectedItems.remove(position)
-        } else {
-            selectedItems.add(position)
-        }
-    }
-
-    fun deleteSelectedItems() {
-        // Remove items from the list (sorting descending to avoid index shifting)
-        val sortedIndices = selectedItems.sortedDescending()
-        for (index in sortedIndices) {
-            if (index < items.size) {
-                items.removeAt(index)
-            }
-        }
-        // Sync fullList so search still works correctly
-        fullList = ArrayList(items)
-
-        // Exit selection mode
-        toggleSelectionMode(false)
-    }
-
-    // Check if list is empty (Used to show "No History" text)
-    fun isEmpty(): Boolean = items.isEmpty()
-
-    // --- SEARCH FILTERING ---
     fun filterList(query: String) {
         val searchText = query.lowercase(Locale.getDefault())
-        items = if (searchText.isEmpty()) {
-            ArrayList(fullList)
+        val filtered = if (searchText.isEmpty()) {
+            fullList
         } else {
             fullList.filter {
                 it.name.lowercase(Locale.getDefault()).contains(searchText) ||
-                        it.sku.lowercase(Locale.getDefault()).contains(searchText)
-            }.toMutableList()
+                        it.itemID.lowercase(Locale.getDefault()).contains(searchText)
+            }
         }
+        organizeData(filtered)
+    }
+
+    fun toggleSelectionMode(enabled: Boolean) {
+        isSelectionMode = enabled
+        selectedItems.clear()
         notifyDataSetChanged()
     }
-    fun deleteAllItems() {
-        items.clear()          // Clear the visible list
-        fullList.clear()       // Clear the backup list (used for search)
-        selectedItems.clear()  // Clear any selections
-        notifyDataSetChanged() // Refresh UI
+
+    fun deleteSelectedItems() {
+        allItems.removeAll(selectedItems)
+        fullList.removeAll(selectedItems)
+        selectedItems.clear()
+        isSelectionMode = false
+        organizeData(allItems)
     }
+
+    fun deleteAllItems() {
+        allItems.clear()
+        fullList.clear()
+        selectedItems.clear()
+        organizeData(allItems)
+    }
+
+    fun getSelectedItems(): List<InventoryItem> = selectedItems.toList()
+    fun isEmpty(): Boolean = allItems.isEmpty()
 }
