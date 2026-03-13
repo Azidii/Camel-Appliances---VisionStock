@@ -129,13 +129,13 @@ class AddItemFragment : Fragment(R.layout.fragment_add_item) {
                 // We resize to 500px width to keep it small and fast
                 val resizedBitmap = getResizedBitmap(bitmap, 500)
 
-                // 3. Convert Bitmap to Base64 String
+                // 3. Convert Bitmap to Base64 String - CRUCIAL ERROR FIX: MUST BE NO_WRAP
                 val outputStream = ByteArrayOutputStream()
                 resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 60, outputStream) // Quality 60%
                 val byteArray = outputStream.toByteArray()
-                val base64Image = Base64.encodeToString(byteArray, Base64.DEFAULT)
+                val base64Image = Base64.encodeToString(byteArray, Base64.NO_WRAP)
 
-                // 4. Save directly to Firestore (No Storage Bucket needed!)
+                // 4. Save to Firestore (No Storage Bucket needed!)
                 saveToFirestore(id, name, category, qty, loc, base64Image)
 
             } catch (e: Exception) {
@@ -168,10 +168,10 @@ class AddItemFragment : Fragment(R.layout.fragment_add_item) {
         val newItem = hashMapOf(
             "itemID" to id,
             "name" to name,
-            "itemCategory" to category,
+            "itemCategory" to category, // Critical fix!
             "quantity" to qty,
-            "itemLocation" to loc,
-            "itemPicture" to imageUrl
+            "itemLocation" to loc, // Critical fix!
+            "itemPicture" to imageUrl // Critical fix!
         )
 
         db.collection("inventory")

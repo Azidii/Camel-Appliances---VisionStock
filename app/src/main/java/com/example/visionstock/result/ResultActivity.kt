@@ -1,6 +1,7 @@
 package com.example.visionstock.result
 
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
 import android.widget.ImageView
@@ -15,7 +16,6 @@ class ResultActivity : AppCompatActivity() {
         setContentView(R.layout.activity_result)
 
         // --- 1. BIND VIEWS ---
-        // Ensure these IDs match your activity_result.xml perfectly
         val btnBack = findViewById<ImageView>(R.id.btnBack)
         val productImage = findViewById<ImageView>(R.id.productImage)
         val tvItemId = findViewById<TextView>(R.id.tvResultItemId)
@@ -30,32 +30,55 @@ class ResultActivity : AppCompatActivity() {
         }
 
         // --- 3. RETRIEVE DATA ---
-        // These keys must match the ones sent by LoadingActivity/ImageSearchFragment
-        val imageBase64String = intent.getStringExtra("scanned_image_uri")
+        val imageString = intent.getStringExtra("scanned_image_uri")
         val itemId = intent.getStringExtra("item_id") ?: "N/A"
         val itemName = intent.getStringExtra("item_name") ?: "Unknown Item"
         val itemCategory = intent.getStringExtra("item_category") ?: "Others"
         val itemLoc = intent.getStringExtra("item_location") ?: "Not Specified"
-
-        // Use getIntExtra for the quantity
         val itemQty = intent.getIntExtra("item_quantity", 0)
 
         // --- 4. REFLECT DATA IN UI ---
-        // Setting the text to the values retrieved from the database
         tvItemId.text = itemId
         tvItemName.text = itemName
         tvCategory.text = itemCategory
         tvLocation.text = itemLoc
         tvQuantity.text = itemQty.toString()
 
-        // --- 5. DECODE AND DISPLAY IMAGE ---
-        if (!imageBase64String.isNullOrEmpty()) {
+        // --- 5. DISPLAY IMAGE ---
+        // Supports both file/content URIs (from scanner) and Base64 strings (from Firestore)
+        if (!imageString.isNullOrEmpty()) {
             try {
-                val decodedBytes = Base64.decode(imageBase64String, Base64.DEFAULT)
-                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
-
-                productImage.setImageBitmap(bitmap)
-                productImage.scaleType = ImageView.ScaleType.CENTER_CROP
+                if (imageString.startsWith("file://") || imageString.startsWith("content://")) {
+                    // Load from URI (scanner captured or gallery-picked image)
+                    val uri = Uri.parse(imageString)
+                    val inputStream = contentResolver.openInputStream(uri)
+                    val bitmap = BitmapFactory.decodeStream(inputStream)
+                    inputStream?.close()
+                    if (bitmap != null) {
+                        productImage.setImageBitmap(bitmap)
+                        productImage.scaleType = ImageView.ScaleType.CENTER_CROP
+                    } else {
+                        productImage.setImageResource(R.drawable.logo)
+                    }
+                } else if (imageString.startsWith("http")) {
+                    // It's a web URL. Since we don't have Glide/Picasso, fallback to logo
+                    productImage.setImageResource(R.drawable.logo)
+                } else {
+                    // Decode Base64 string (from Firestore database)
+                    var cleanBase64 = imageString
+                    val commaIndex = cleanBase64.indexOf(",")
+                    if (commaIndex != -1) {
+                        cleanBase64 = cleanBase64.substring(commaIndex + 1)
+                    }
+                    val decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT)
+                    val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                    if (bitmap != null) {
+                        productImage.setImageBitmap(bitmap)
+                        productImage.scaleType = ImageView.ScaleType.CENTER_CROP
+                    } else {
+                        productImage.setImageResource(R.drawable.logo)
+                    }
+                }
             } catch (e: Exception) {
                 productImage.setImageResource(R.drawable.logo)
             }

@@ -1,111 +1,128 @@
 package com.example.visionstock.helper
 
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
-import android.view.Window
-import android.widget.Button
+import android.graphics.drawable.GradientDrawable
+import android.util.TypedValue
+import android.view.Gravity
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import com.example.visionstock.R
 
 object DialogHelper {
-
     private var loadingDialog: AlertDialog? = null
 
-    // --- LOADING DIALOG (Fixed for Crashes) ---
     fun showLoading(context: Context, message: String) {
         try {
-            // 1. Clean up old dialogs to prevent "Window Leaked" errors
             hideLoading()
-
             val builder = AlertDialog.Builder(context)
             builder.setCancelable(false)
             builder.setMessage(message)
-
-            // 2. Padding for the spinner (As you requested)
             val progressBar = ProgressBar(context)
-            progressBar.setPadding(50, 50, 50, 50) // Increased padding for better look
+            progressBar.setPadding(50, 50, 50, 50)
             builder.setView(progressBar)
-
             loadingDialog = builder.create()
             loadingDialog?.show()
-        } catch (e: Exception) {
-            e.printStackTrace() // Log error but don't crash app
-        }
+        } catch (e: Exception) { e.printStackTrace() }
     }
 
     fun hideLoading() {
         try {
-            if (loadingDialog != null && loadingDialog!!.isShowing) {
-                loadingDialog?.dismiss()
-            }
+            if (loadingDialog != null && loadingDialog!!.isShowing) loadingDialog?.dismiss()
             loadingDialog = null
-        } catch (e: Exception) {
-            loadingDialog = null
-        }
+        } catch (e: Exception) { loadingDialog = null }
     }
-
-    // --- SUCCESS / ERROR DIALOGS ---
 
     fun showSuccess(context: Context, title: String, message: String, onDismiss: () -> Unit = {}) {
         showDialog(context, title, message, true, onDismiss)
     }
 
-    fun showError(context: Context, title: String, message: String) {
-        showDialog(context, title, message, false)
+    fun showError(context: Context, title: String, message: String, onDismiss: () -> Unit = {}) {
+        showDialog(context, title, message, false, onDismiss)
     }
 
     private fun showDialog(context: Context, title: String, message: String, isSuccess: Boolean, onDismiss: () -> Unit = {}) {
         try {
-            val dialog = Dialog(context)
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-            dialog.setContentView(R.layout.dialog_status) // Ensure this XML exists!
+            val dp = { value: Int ->
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), context.resources.displayMetrics).toInt()
+            }
+            val accentColor = if (isSuccess) Color.parseColor("#4CAF50") else Color.parseColor("#C8102E")
+
+            val container = LinearLayout(context)
+            container.orientation = LinearLayout.VERTICAL
+            container.gravity = Gravity.CENTER
+            container.setPadding(dp(28), dp(32), dp(28), dp(24))
+            val cardBg = GradientDrawable()
+            cardBg.setColor(Color.WHITE)
+            cardBg.cornerRadius = dp(20).toFloat()
+            container.background = cardBg
+
+            val iconView = ImageView(context)
+            val iconParams = LinearLayout.LayoutParams(dp(56), dp(56))
+            iconParams.bottomMargin = dp(16)
+            iconParams.gravity = Gravity.CENTER
+            iconView.layoutParams = iconParams
+            try {
+                if (isSuccess) iconView.setImageResource(R.drawable.ic_check_circle)
+                else iconView.setImageResource(R.drawable.ic_error)
+                iconView.setColorFilter(accentColor)
+            } catch (e: Exception) { }
+            container.addView(iconView)
+
+            val titleView = TextView(context)
+            titleView.text = title
+            titleView.setTextColor(Color.parseColor("#212121"))
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
+            titleView.setTypeface(null, Typeface.BOLD)
+            titleView.gravity = Gravity.CENTER
+            titleView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            container.addView(titleView)
+
+            val messageView = TextView(context)
+            messageView.text = message
+            messageView.setTextColor(Color.parseColor("#757575"))
+            messageView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            messageView.gravity = Gravity.CENTER
+            val msgParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            msgParams.topMargin = dp(8)
+            messageView.layoutParams = msgParams
+            container.addView(messageView)
+
+            val btnBg = GradientDrawable()
+            btnBg.setColor(accentColor)
+            btnBg.cornerRadius = dp(12).toFloat()
+            val button = TextView(context)
+            button.text = "Okay"
+            button.setTextColor(Color.WHITE)
+            button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+            button.setTypeface(null, Typeface.BOLD)
+            button.gravity = Gravity.CENTER
+            button.background = btnBg
+            button.setPadding(dp(16), dp(14), dp(16), dp(14))
+            val btnParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+            btnParams.topMargin = dp(24)
+            button.layoutParams = btnParams
+            container.addView(button)
+
+            val builder = AlertDialog.Builder(context)
+            builder.setView(container)
+            builder.setCancelable(false)
+            val dialog = builder.create()
             dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            dialog.setCancelable(false)
-
-            // Use '?' (Safe Call) to prevent crash if ID is missing in XML
-            val tvTitle = dialog.findViewById<TextView>(R.id.dialogTitle)
-            val tvMessage = dialog.findViewById<TextView>(R.id.dialogMessage)
-            val btnOk = dialog.findViewById<Button>(R.id.btnDialogOk)
-            val icon = dialog.findViewById<ImageView>(R.id.dialogIcon)
-
-            tvTitle?.text = title
-            tvMessage?.text = message
-
-            if (isSuccess) {
-                // SUCCESS: Green Theme
-                icon?.setImageResource(R.drawable.ic_check_circle)
-                icon?.setColorFilter(ContextCompat.getColor(context, android.R.color.holo_green_dark))
-                btnOk?.setBackgroundColor(Color.parseColor("#4CAF50")) // Green
-            } else {
-                // ERROR: Red Theme
-                icon?.setImageResource(R.drawable.ic_error)
-                icon?.setColorFilter(ContextCompat.getColor(context, android.R.color.holo_red_dark))
-                btnOk?.setBackgroundColor(Color.parseColor("#C8102E")) // Red
-            }
-
-            btnOk?.setOnClickListener {
-                dialog.dismiss()
-                onDismiss()
-            }
-
+            button.setOnClickListener { dialog.dismiss(); onDismiss() }
             dialog.show()
 
         } catch (e: Exception) {
             e.printStackTrace()
-            // Fallback: If custom dialog fails, show a standard system alert so the user still sees the message
             AlertDialog.Builder(context)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton("OK") { d, _ ->
-                    d.dismiss()
-                    onDismiss()
-                }
+                .setPositiveButton("OK") { d, _ -> d.dismiss(); onDismiss() }
                 .show()
         }
     }

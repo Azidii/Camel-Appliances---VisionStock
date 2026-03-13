@@ -16,14 +16,18 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.visionstock.R
-import com.example.visionstock.adapter.InventoryAdapter
-import com.example.visionstock.item.InventoryItem
+import com.example.visionstock.adapter.RecentScanAdapter
+import com.example.visionstock.adapter.ScanHistoryItem
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class HistoryFragment : Fragment(R.layout.fragment_history) {
 
-    private lateinit var adapter: InventoryAdapter
-    private var historyList: MutableList<InventoryItem> = mutableListOf()
+    private val db = FirebaseFirestore.getInstance()
+    private lateinit var adapter: RecentScanAdapter
+    private var historyList: MutableList<ScanHistoryItem> = mutableListOf()
+    private var allDocs: MutableList<String> = mutableListOf() // Firestore doc IDs for deletion
 
     private var isSelectionMode = false
 
@@ -43,81 +47,29 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         val btnCloseSearch = view.findViewById<ImageView>(R.id.btnCloseSearch)
         val rvHistory = view.findViewById<RecyclerView>(R.id.rvHistory)
 
-        // --- DUMMY DATA (Categorized) ---
-        if (historyList.isEmpty()) {
-            historyList = mutableListOf(
-                InventoryItem(itemID = "SCAN-001", name = "Scanned Item 1", category = "Raw Materials", quantity = 10),
-                InventoryItem(itemID = "SCAN-002", name = "Scanned Item 2", category = "Electronic & Electrical Components", quantity = 5),
-                InventoryItem(itemID = "SCAN-003", name = "Scanned Item 3", category = "Fasteners & Hardware", quantity = 20)
-            )
-        }
-
-        // Initialize Adapter with the categorized logic implemented previously
-        adapter = InventoryAdapter(historyList)
+        // Initialize Adapter with empty list
+        adapter = RecentScanAdapter(historyList)
         rvHistory.layoutManager = LinearLayoutManager(requireContext())
         rvHistory.adapter = adapter
 
-        // Initial empty state check
-        toggleEmptyState(historyList.size)
+        // Fetch scan history from Firestore
+        fetchScanHistory()
 
         // --- LISTENERS ---
-
         btnBack.setOnClickListener { parentFragmentManager.popBackStack() }
 
-        // 1. FAB CLICK LOGIC (Dual Function)
+        // 1. FAB: CLEAR ALL CONFIRMATION
         fabDeleteAll.setOnClickListener {
-            if (adapter.isEmpty()) {
+            if (historyList.isEmpty()) {
                 Toast.makeText(requireContext(), "History is empty", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (!isSelectionMode) {
-                isSelectionMode = true
-
-                // Update UI: Show Header Options
-                btnBack.visibility = View.GONE
-                btnCancelDelete.visibility = View.VISIBLE
-                normalActions.visibility = View.GONE
-                btnClearAll.visibility = View.VISIBLE
-                tvTitle.text = "Select Items"
-
-                adapter.toggleSelectionMode(true)
-            } else {
-                // STATE B: DELETE SELECTED ITEMS
-                val selectedItems = adapter.getSelectedItems()
-
-                if (selectedItems.isNotEmpty()) {
-                    AlertDialog.Builder(requireContext())
-                        .setTitle("Delete Selected")
-                        .setMessage("Are you sure you want to delete ${selectedItems.size} items?")
-                        .setPositiveButton("Delete") { _, _ ->
-                            // This now references the new method in InventoryAdapter
-                            adapter.deleteSelectedItems()
-
-                            exitSelectionMode()
-                            // Re-check empty state after deletion
-                            toggleEmptyState(if(adapter.isEmpty()) 0 else 1)
-                            Toast.makeText(requireContext(), "Selected items deleted", Toast.LENGTH_SHORT).show()
-                        }
-                        .setNegativeButton("Cancel", null)
-                        .show()
-                } else {
-                    Toast.makeText(requireContext(), "No items selected", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-
-        // 2. CLEAR ALL CLICK (Full wipe)
-        btnClearAll.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("Clear All History")
-                .setMessage("This will permanently delete ALL items from history. Are you sure?")
+                .setMessage("This will permanently delete ALL scan history. Are you sure?")
                 .setPositiveButton("Delete All") { _, _ ->
-                    // This now references the new method in InventoryAdapter
-                    adapter.deleteAllItems()
-                    exitSelectionMode()
-                    toggleEmptyState(0) // Explicitly show empty state
-                    Toast.makeText(requireContext(), "History cleared", Toast.LENGTH_SHORT).show()
+                    deleteAllScanHistory()
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
@@ -137,7 +89,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
 
         btnCloseSearch.setOnClickListener {
             etSearchBar.text.clear()
-            adapter.filterList("")
+            adapter.updateList(historyList)
             searchContainer.visibility = View.GONE
             tvTitle.visibility = View.VISIBLE
             normalActions.visibility = View.VISIBLE
@@ -148,10 +100,62 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         etSearchBar.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                adapter.filterList(s.toString())
+                val query = s.toString().lowercase()
+                val filtered = historyList.filter {
+                    it.name.lowercase().contains(query) || it.category.lowercase().contains(query)
+                }
+                adapter.updateList(filtered)
             }
             override fun afterTextChanged(s: Editable?) {}
         })
+    }
+
+    private fun fetchScanHistory() {
+        db.collection("camel_scan_history")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                historyList.clear()
+                allDocs.clear()
+
+                for (doc in snapshot) {
+                    val item = ScanHistoryItem(
+                        name = doc.getString("name") ?: "Unknown",
+                        category = doc.getString("category") ?: "Others",
+                        timestamp = doc.getLong("timestamp") ?: 0L,
+                        itemId = doc.getString("itemId") ?: "N/A",
+                        location = doc.getString("location") ?: "",
+                        quantity = doc.getLong("quantity")?.toInt() ?: 0,
+                        imageUrl = doc.getString("imageUrl") ?: ""
+                    )
+                    historyList.add(item)
+                    allDocs.add(doc.id)
+                }
+
+                adapter.updateList(historyList)
+                toggleEmptyState(historyList.size)
+            }
+            .addOnFailureListener {
+                toggleEmptyState(0)
+            }
+    }
+
+    private fun deleteAllScanHistory() {
+        val batch = db.batch()
+        for (docId in allDocs) {
+            batch.delete(db.collection("camel_scan_history").document(docId))
+        }
+        batch.commit()
+            .addOnSuccessListener {
+                historyList.clear()
+                allDocs.clear()
+                adapter.updateList(historyList)
+                toggleEmptyState(0)
+                Toast.makeText(requireContext(), "History cleared", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to clear history", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun exitSelectionMode() {
@@ -160,8 +164,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         view?.findViewById<ImageView>(R.id.btnCancelDelete)?.visibility = View.GONE
         view?.findViewById<LinearLayout>(R.id.normalActions)?.visibility = View.VISIBLE
         view?.findViewById<TextView>(R.id.btnClearAll)?.visibility = View.GONE
-        view?.findViewById<TextView>(R.id.tvTitle)?.text = "History"
-        adapter.toggleSelectionMode(false)
+        view?.findViewById<TextView>(R.id.tvTitle)?.text = "Recent Scans"
     }
 
     private fun toggleEmptyState(itemCount: Int) {
@@ -171,7 +174,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
 
         if (itemCount == 0) {
             rvHistory?.visibility = View.GONE
-            emptyState?.visibility = View.VISIBLE // Fixed unused reference
+            emptyState?.visibility = View.VISIBLE
             fabDeleteAll?.visibility = View.GONE
         } else {
             rvHistory?.visibility = View.VISIBLE

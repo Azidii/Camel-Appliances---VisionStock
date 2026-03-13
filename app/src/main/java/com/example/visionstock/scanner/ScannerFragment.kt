@@ -88,7 +88,11 @@ class ScannerFragment : Fragment(R.layout.fragment_scanner) {
         }
 
         // CENTER BUTTON: TAKE PHOTO
-        view.findViewById<View>(R.id.btnTakePhoto).setOnClickListener {
+        val btnTakePhoto = view.findViewById<View>(R.id.btnTakePhoto)
+        
+        btnTakePhoto.setOnClickListener {
+            // Re-enable button onResume to prevent double click, but don't show custom overlay
+            btnTakePhoto.isEnabled = false 
             takePhoto()
         }
 
@@ -118,10 +122,18 @@ class ScannerFragment : Fragment(R.layout.fragment_scanner) {
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e("ScannerFragment", "Photo capture failed: ${exc.message}", exc)
-                    Toast.makeText(requireContext(), "Capture Failed", Toast.LENGTH_SHORT).show()
+                    requireActivity().runOnUiThread {
+                        view?.findViewById<View>(R.id.btnTakePhoto)?.isEnabled = true
+                        Toast.makeText(requireContext(), "Capture Failed", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                    // Re-enable in case user navigates back to scanner
+                    requireActivity().runOnUiThread {
+                        view?.findViewById<View>(R.id.btnTakePhoto)?.isEnabled = true 
+                    }
+                    
                     val savedUri = Uri.fromFile(photoFile)
                     goToResultPage(savedUri)
                 }
